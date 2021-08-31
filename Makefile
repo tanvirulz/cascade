@@ -14,3 +14,15 @@ clean:
 	rm -f bcc
 	rm -f alice_cascade_state_*.txt
 	rm -f mbf_*
+	rm -f bob_cascade_state_*.txt
+	rm -f rbf_*
+
+cleanbob:
+	rm -f bcc
+	rm -f bob_cascade_state_*.txt
+	rm -f rbf_*
+
+cleanalice:
+	rm -f acc
+	rm -f alice_cascade_state_*.txt
+	rm -f mbf_*

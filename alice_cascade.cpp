@@ -47,7 +47,7 @@ class Alice{
     int get_parity(int l, int h);
 
     public:
-    void init(string key_file_name,string state_file_name, int protocol_run_id,int random_shuffle_seed);
+    void init(string key_file_name, int protocol_run_id,int random_shuffle_seed);
     void load_state();
     void store_state();
     bool is_new_run();
@@ -179,9 +179,9 @@ void Alice::store_state(){
     fclose(state_file);
 }
 
-void Alice::init(string key_file_name,string state_file_name, int protocol_run_id,int random_shuffle_seed){
+void Alice::init(string key_file_name, int protocol_run_id,int random_shuffle_seed){
     this->key_file_name=key_file_name;
-    this->state_file_name=state_file_name;
+    //this->state_file_name=state_file_name;
     this->protocol_run_id=protocol_run_id;
     this->random_shuffle_seed=random_shuffle_seed;
     this->iteration=0;
@@ -207,7 +207,7 @@ bool Alice::is_new_run(){
 int main(){
     Alice alice;
     //alice.load_data("test.txt");
-    alice.init("test.txt","state.txt",35,3141562);
+    alice.init("test.txt",35,3141562);
     if(alice.is_new_run()){
         alice.start_cascade();
     }
