@@ -50,7 +50,7 @@ class Bob{
 
 };
 
-void init(string key_file_name,string state_file_name, int protocol_run_id,int random_shuffle_seed){
+void Bob::init(string key_file_name,string state_file_name, int protocol_run_id,int random_shuffle_seed){
     this->key_file_name=key_file_name;
     this->state_file_name=state_file_name;
     this->protocol_run_id=protocol_run_id;

@@ -48,8 +48,11 @@ class Alice{
 
     public:
     void init(string key_file_name,string state_file_name, int protocol_run_id,int random_shuffle_seed);
+    void load_state();
+    void store_state();
+    bool is_new_run();
     void start_cascade();
-    void record_state();
+
 
     ~Alice(){
         mbfout.flush();
@@ -59,10 +62,7 @@ class Alice{
 };
 
 
-void Alice::record_state(){
-    //[TODO]
-    return;
-}
+
 int Alice::get_parity(int l, int h){
     int p; //parity
     p = 0;
@@ -115,7 +115,7 @@ inline bool Alice::file_exists (const string& name) {
 
 void Alice::init_message_bunch_buffer(){
     char mbfname[FILE_NAME_SIZE];
-    sprintf(mbfname,"mbf_%d.bin",protocol_run_id);
+    sprintf(mbfname,"mbf_%d_itr_%d.bin",protocol_run_id,iteration);
     cout<<mbfname<<endl;
     this->message_bunch_file_name = mbfname;
     cout<< "asstring: "<<this->message_bunch_file_name<<" length "<<this->message_bunch_file_name.length()<<endl;
@@ -147,6 +147,38 @@ void Alice::load_data(){
     }
 }
 
+void Alice::load_state(){
+    char state_file_name[FILE_NAME_SIZE];
+    FILE * state_file;
+
+    sprintf(state_file_name,"alice_cascade_state_%d.txt",protocol_run_id);
+    this->state_file_name = state_file_name;
+    state_file= fopen(state_file_name,"r");
+    if (!state_file){
+        cout<<"State file does not exist!"<<endl;
+        cout<<"this is a new run"<<endl;
+        //create new state file
+        state_file = fopen(state_file_name,"w");
+        //write the iteration number for now;
+        fprintf(state_file,"%d\n",this->iteration);
+        fclose(state_file);
+    }
+    else{
+        cout<< "state pre-exists!!"<<endl;
+        fscanf(state_file,"%d\n",&this->iteration);
+        cout<< "current state of iteration: "<<this->iteration<<endl;
+        fclose(state_file);
+    }
+    
+}
+
+void Alice::store_state(){
+    FILE * state_file;
+    state_file = fopen(state_file_name.c_str(),"w");
+    fprintf(state_file,"%d\n",this->iteration);
+    fclose(state_file);
+}
+
 void Alice::init(string key_file_name,string state_file_name, int protocol_run_id,int random_shuffle_seed){
     this->key_file_name=key_file_name;
     this->state_file_name=state_file_name;
@@ -156,19 +188,30 @@ void Alice::init(string key_file_name,string state_file_name, int protocol_run_i
     
     
     this->load_data();
+    this->load_state();
     this->init_message_bunch_buffer();    
+    
 
 }
 
-
+bool Alice::is_new_run(){
+    if (this->iteration==0){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
 
 int main(){
     Alice alice;
     //alice.load_data("test.txt");
     alice.init("test.txt","state.txt",35,3141562);
-    alice.start_cascade();
-    alice.record_state();
+    if(alice.is_new_run()){
+        alice.start_cascade();
+    }
+    alice.store_state();
     //int l=1,h=14;
     //cout<<"parity "<<alice.get_parity(l,h)<<endl;
     return 0;
