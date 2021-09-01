@@ -7,6 +7,9 @@
 #include <streambuf>
 //#include <ifstream>
 
+//#include "buffered_file_out.h"
+#include "message_bunch_writer.h"
+
 #define FILE_NAME_SIZE 256
 #define BUFFER_SIZE (32*1024)
 
@@ -27,41 +30,33 @@ class Alice{
     int iteration;
     int random_shuffle_seed;
 
-    string message_bunch_file_name;
-
+    
     string sk ; //sifted key
-
-    char mbfBuffer[BUFFER_SIZE];
-    ofstream mbfout; //message bunch file out
-
-
+    
+    MessageBunchWriter mbfout;
     
     void load_data();
-    void init_message_bunch_buffer();
-
-    
-    inline bool file_exists(const string& name);
-
-    void compute_dual_block_parity(int l, int h);
-
     int get_parity(int l, int h);
 
-    public:
-    void init(string key_file_name, int protocol_run_id,int random_shuffle_seed);
+    void compute_and_write_dual_block_parity(int l, int h);
     void load_state();
     void store_state();
+
+    public:
+    
+    void init(string key_file_name, int protocol_run_id,int random_shuffle_seed);
+    
+    
     bool is_new_run();
     void start_cascade();
-
-
-    ~Alice(){
-        mbfout.flush();
-        mbfout.close();
-    }
+    void cascade();
+    ~Alice();
 
 };
 
-
+Alice::~Alice(){
+    this->store_state();
+}
 
 int Alice::get_parity(int l, int h){
     int p; //parity
@@ -73,7 +68,7 @@ int Alice::get_parity(int l, int h){
     return p;
 }
 
-void Alice::compute_dual_block_parity(int l, int h){
+void Alice::compute_and_write_dual_block_parity(int l, int h){
     int m = (l+h)/2 ; //compute the midpoinf of the dual block
     uint8_t dual_parity = 0;
     if (get_parity(l,m)){
@@ -82,11 +77,13 @@ void Alice::compute_dual_block_parity(int l, int h){
     if (get_parity(m,h)){
         dual_parity = dual_parity|RIGHT;
     }
-    mbfout.write(reinterpret_cast<char *>(&l),sizeof(l));
-    mbfout.write(reinterpret_cast<char *>(&h),sizeof(h));
-    mbfout.write(reinterpret_cast<char *>(&dual_parity),sizeof(dual_parity));
+    cout<<"writing: "<<l<<", "<<h<<", "<<int(dual_parity)<<endl;
+    mbfout.write_message(l,h,dual_parity);
 }
 
+void Alice::cascade(){
+    return;
+}
 void Alice::start_cascade(){
     int dual_block_size = BLOCK_SIZE*2;
     int num_message = sk.length()/dual_block_size ;
@@ -95,14 +92,14 @@ void Alice::start_cascade(){
     for (i =0;i<num_message;i++){
         l = i*dual_block_size;
         h = (i+1)*dual_block_size;
-        this->compute_dual_block_parity(l,h);
+        this->compute_and_write_dual_block_parity(l,h);
         //cout<<"fff "<<endl;
     }
     //this->mbfout.flush(); //flushed in destractor 
     this->iteration++; // this has to be stored in the state file
 }
 
-
+/*
 inline bool Alice::file_exists (const string& name) {
     if (FILE *file = fopen(name.c_str(), "r")) {
         fclose(file);
@@ -112,18 +109,45 @@ inline bool Alice::file_exists (const string& name) {
     }   
 }
 
+void Alice::init_message_bunch_buffer_in(){
+    char mbf_in_name[FILE_NAME_SIZE];
+    sprintf(mbf_in_name,"mbf_%d_itr_%d.bin",protocol_run_id, iteration-1 ); //Load the message bunch file form the previous iteraiton.  
+    cout<<"mbf_in_name: "<<mbf_in_name<<endl;
+    this->message_bunch_in_file_name = mbf_in_name;
+    cout<< "asstring: "<<this->message_bunch_in_file_name<<" length "<<this->message_bunch_in_file_name.length()<<endl;
+    mbfin.rdbuf()->pubsetbuf(this->mbf_in_Buffer, BUFFER_SIZE);
+    mbfin.open(message_bunch_in_file_name, ios::in|ios::binary);
+    if(!mbfin.is_open()){
+        cout<<"ERROR: previous message bunch file not found!"<<endl;
 
-void Alice::init_message_bunch_buffer(){
-    char mbfname[FILE_NAME_SIZE];
-    sprintf(mbfname,"mbf_%d_itr_%d.bin",protocol_run_id,iteration);
-    cout<<mbfname<<endl;
-    this->message_bunch_file_name = mbfname;
-    cout<< "asstring: "<<this->message_bunch_file_name<<" length "<<this->message_bunch_file_name.length()<<endl;
-
-    mbfout.rdbuf()->pubsetbuf(this->mbfBuffer, BUFFER_SIZE);
-    mbfout.open(message_bunch_file_name,ios::out|ios::binary|ios::trunc);
+    }
 
 }
+void Alice::init_response_bunch_buffer_in(){
+    char rbf_in_name[FILE_NAME_SIZE];
+    sprintf(rbf_in_name,"mbf_%d_itr_%d.bin",protocol_run_id, iteration-1 );
+    cout<<"rbf_in_name: "<<rbf_in_name<<endl;
+    this->response_bunch_in_file_name = rbf_in_name;
+    cout<< "asstring: "<<this->response_bunch_in_file_name<<" length "<<this->response_bunch_in_file_name.length()<<endl;
+    rbfin.rdbuf()->pubsetbuf(this->rbf_in_Buffer, BUFFER_SIZE);
+    rbfin.open(response_bunch_in_file_name, ios::in|ios::binary);
+    if(!mbfin.is_open()){
+        cout<<"ERROR: response bunch file from Bob not found!"<< endl;
+    }
+
+}
+void Alice::init_message_bunch_buffer_out(){
+    char mbf_out_name[FILE_NAME_SIZE];
+    sprintf(mbf_out_name,"mbf_%d_itr_%d.bin",protocol_run_id,iteration);
+    cout<<mbf_out_name<<endl;
+    this->message_bunch_out_file_name = mbf_out_name;
+    cout<< "asstring: "<<this->message_bunch_out_file_name<<" length "<<this->message_bunch_out_file_name.length()<<endl;
+
+    mbfout.rdbuf()->pubsetbuf(this->mbf_out_Buffer, BUFFER_SIZE);
+    mbfout.open(message_bunch_out_file_name,ios::out|ios::binary|ios::trunc);
+
+}
+*/
 
 void Alice::load_data(){
     ifstream sk_file(this->key_file_name.c_str());
@@ -189,7 +213,11 @@ void Alice::init(string key_file_name, int protocol_run_id,int random_shuffle_se
     
     this->load_data();
     this->load_state();
-    this->init_message_bunch_buffer();    
+    //this->init_message_bunch_buffer_out(); 
+    this->mbfout.init("messages/alice_mbf",protocol_run_id,iteration);
+    if(!this->is_new_run()){ //If this is not a new run, then load the previous message bunch;
+    //    this->init_message_bunch_buffer_in();
+    }   
     
 
 }
@@ -204,15 +232,27 @@ bool Alice::is_new_run(){
 }
 
 
+
 int main(){
+    //BufferedFileOut mbfout("alice",35,10);
+    //MessageBunchWriter mbfout;
+    //mbfout.init("alice_mbf",35,10);
+    //mbfout.write_message(10,12,2);
+    //MessageBunchWriter * test;
+    
+    //mbfout.write_index(12);
+    //mbfout.write_dual_parity('a');
     Alice alice;
     //alice.load_data("test.txt");
     alice.init("test.txt",35,3141562);
     if(alice.is_new_run()){
         alice.start_cascade();
     }
-    alice.store_state();
+    //alice's state stored in destractor
+    
     //int l=1,h=14;
     //cout<<"parity "<<alice.get_parity(l,h)<<endl;
     return 0;
+    
+   
 }

@@ -7,6 +7,9 @@
 #include <streambuf>
 //#include <ifstream>
 
+#include "message_bunch_reader.h"
+#include "response_message_writer.h"
+
 #define FILE_NAME_SIZE 256
 #define BUFFER_SIZE (32*1024)
 
@@ -25,17 +28,20 @@ class Bob{
     int iteration;
     int random_shuffle_seed;
 
-    string message_bunch_file_name;
-    string response_bunch_file_name;
+    //string message_bunch_file_name;
+    //string response_bunch_file_name;
 
     string sk ; //sifted key
-
+    MessageBunchReader mbfin;
+    ResponseMessageWriter rbfout;
+    /*
     char mbfBuffer[BUFFER_SIZE];
     char rbfBuffer[BUFFER_SIZE];
     ifstream mbfin; //message bunch file in
     ofstream rbfout; // response bunch file out
 
-    
+    */
+
     void load_data();
     void init_message_bunch_buffer();
 
@@ -53,12 +59,7 @@ class Bob{
     void cascade();
     void load_state();
     void store_state();
-    void compute_response(int l, int h,uint8_t dual_parity);
-    ~Bob(){
-        mbfin.close();
-        rbfout.flush();
-        rbfout.close();
-    }
+    void compute_and_write_response(int l, int h,uint8_t dual_parity);
 
 };
 
@@ -124,36 +125,11 @@ void Bob::init(string key_file_name, int protocol_run_id,int random_shuffle_seed
     
     this->load_data();
     this->load_state();
-    this->init_message_bunch_buffer();
-    this->init_response_bunch_buffer();  
+    this->mbfin.init("messages/alice_mbf",protocol_run_id,iteration);
+    this->rbfout.init("messages/bob_rbf",protocol_run_id,iteration);
 
 }
-void Bob::init_message_bunch_buffer(){
-    char mbfname[FILE_NAME_SIZE];
-    sprintf(mbfname,"mbf_%d_itr_%d.bin",protocol_run_id,iteration);
-    cout<<mbfname<<endl;
-    this->message_bunch_file_name = mbfname;
-    cout<< "asstring: "<<this->message_bunch_file_name<<" length "<<this->message_bunch_file_name.length()<<endl;
 
-    mbfin.rdbuf()->pubsetbuf(this->mbfBuffer, BUFFER_SIZE);
-    mbfin.open(message_bunch_file_name, ios::in|ios::binary);
-    if(!mbfin.is_open()){
-        cout<<"message bunch file from Alice not found!"<<endl;
-
-    }
-}
-
-void Bob::init_response_bunch_buffer(){
-    char rbfname[FILE_NAME_SIZE];
-    sprintf(rbfname,"rbf_%d_itr_%d.bin",protocol_run_id,iteration);
-    cout<<rbfname<<endl;
-    this->response_bunch_file_name = rbfname;
-    cout<< "asstring: "<<this->response_bunch_file_name<<" length "<<this->response_bunch_file_name.length()<<endl;
-
-    rbfout.rdbuf()->pubsetbuf(this->rbfBuffer, BUFFER_SIZE);
-    rbfout.open(response_bunch_file_name,ios::out|ios::binary|ios::trunc);
-
-}
 
 int Bob::get_parity(int l, int h){
     int p; //parity
@@ -164,7 +140,7 @@ int Bob::get_parity(int l, int h){
     p %=2;
     return p;
 }
-void Bob::compute_response(int l, int h,uint8_t alcie_dp){
+void Bob::compute_and_write_response(int l, int h,uint8_t alcie_dp){
     int m = (l+h)/2;
     uint8_t response;
     uint8_t dual_parity = 0;
@@ -177,7 +153,8 @@ void Bob::compute_response(int l, int h,uint8_t alcie_dp){
     }
     response = dual_parity^alcie_dp;
     cout<<"response: "<< int(response)<<endl;
-    rbfout.write(reinterpret_cast<char *>(&response),sizeof(response));
+    rbfout.write_response(response);
+    //rbfout.write(reinterpret_cast<char *>(&response),sizeof(response));
 }
 
 void Bob::cascade(){
@@ -193,25 +170,29 @@ void Bob::cascade(){
             //create response bunch
     //iteration ++
 
-    while(1){
-        mbfin.read(reinterpret_cast<char *>(&l),sizeof(l));
-        if (mbfin.eof()) break; // EOF can only be detected after the final *failed* read attempt. 
-        //cout <<l <<endl;
-        mbfin.read(reinterpret_cast<char *>(&h),sizeof(h));
-        if (mbfin.eof()) break; // EOF can only be detected after the final *failed* read attempt. 
-        mbfin.read(reinterpret_cast<char *>(&dual_parity),sizeof(dual_parity));
-        if (mbfin.eof()) break; // EOF can only be detected after the final *failed* read attempt. 
-
-        this->compute_response(l,h,dual_parity);
+    while(mbfin.read_message(&l,&h,&dual_parity)){
+        
+        this->compute_and_write_response(l,h,dual_parity);
 
     }
     this->iteration++;
     
 }
 int main(){
+    /*
+    MessageBunchReader mbfin;
+    int l,h;
+    unsigned char dp;
+    mbfin.init("alice_mbf",35,0);
+    while(mbfin.read_message(&l,&h,&dp)){
+        cout<<"message from Alice read "<<l<<", "<<h<<", "<<int(dp)<<endl;
+    }*/
+    
     Bob bob;
     bob.init("test_bob_sk.txt",35,3141562);
     bob.cascade();
     bob.store_state();
+    
+    
     return 0;
 }
