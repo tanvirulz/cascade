@@ -1,6 +1,5 @@
 #include "buffered_file_in.h"
 #include <iostream>
-#
 
 using namespace std;
 
@@ -24,15 +23,15 @@ void BufferedFileIn::init(string name,int protocol_run_ind,int iteration){
 }
 
 bool BufferedFileIn::read_index(int * idx){
-    int h=0;
+    int index=0;
     //cout<<"in read index"<<endl;
     //in_file.write(reinterpret_cast<char *>(&idx),sizeof(idx));
-    in_file.read(reinterpret_cast<char *>(&h),sizeof(h));
+    in_file.read(reinterpret_cast<char *>(&index),sizeof(index));
     if (in_file.eof()){
         return false;
     } 
     else{
-        *idx = h;
+        *idx = index;
         return true;
     }
     

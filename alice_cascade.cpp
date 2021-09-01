@@ -10,6 +10,7 @@
 //#include "buffered_file_out.h"
 #include "message_bunch_writer.h"
 #include "response_message_reader.h"
+#include "sifted_key_container.h"
 
 #define FILE_NAME_SIZE 256
 #define BUFFER_SIZE (32*1024)
@@ -26,19 +27,17 @@ class Alice{
 
     private:
     string key_file_name;
+    string working_key_file_name;
     string state_file_name; 
     int protocol_run_id;
     int iteration;
     int random_shuffle_seed;
 
-    
-    string sk ; //sifted key
+    SiftedKeyContainer sk;
+    //string sk ; //sifted key
     
     MessageBunchWriter mbfout;
     
-    void load_data();
-    int get_parity(int l, int h);
-
     void compute_and_write_dual_block_parity(int l, int h);
     void load_state();
     void store_state();
@@ -59,23 +58,15 @@ Alice::~Alice(){
     this->store_state();
 }
 
-int Alice::get_parity(int l, int h){
-    int p; //parity
-    p = 0;
-    for(int i=l;i<h;i++){
-        p += (sk[i]-'0');
-    }
-    p %=2;
-    return p;
-}
+
 
 void Alice::compute_and_write_dual_block_parity(int l, int h){
     int m = (l+h)/2 ; //compute the midpoinf of the dual block
     uint8_t dual_parity = 0;
-    if (get_parity(l,m)){
+    if (sk.get_parity(l,m)){
         dual_parity = dual_parity|LEFT;
     }
-    if (get_parity(m,h)){
+    if (sk.get_parity(m,h)){
         dual_parity = dual_parity|RIGHT;
     }
     cout<<"writing: "<<l<<", "<<h<<", "<<int(dual_parity)<<endl;
@@ -100,28 +91,6 @@ void Alice::start_cascade(){
     this->iteration++; // this has to be stored in the state file
 }
 
-
-void Alice::load_data(){
-    ifstream sk_file(this->key_file_name.c_str());
-    if (sk_file.is_open()){
-        cout<<"sifted key file opened"<<endl;
-        /*pre assign buffer space for the sifted key string to be loaded*/
-        sk_file.seekg(0, std::ios::end);   
-        this->sk.reserve(sk_file.tellg());
-        sk_file.seekg(0, std::ios::beg);
-        this->sk.assign((std::istreambuf_iterator<char>(sk_file)),
-            std::istreambuf_iterator<char>());
-        cout<<"read success!"<<endl;
-        cout<<"sk: "<<this->sk<<endl;
-        cout<<"bytes read: "<<sk.length()<<endl;
-        
-        sk_file.close();
-
-    }
-    else{
-        cout<<"could not open sifted key file: "<<key_file_name<<endl;
-    }
-}
 
 void Alice::load_state(){
     char state_file_name[FILE_NAME_SIZE];
@@ -163,8 +132,9 @@ void Alice::init(string key_file_name, int protocol_run_id,int random_shuffle_se
     this->iteration=0;
     
     
-    this->load_data();
+    
     this->load_state();
+    this->sk.load_data(key_file_name,iteration);
     //this->init_message_bunch_buffer_out(); 
     this->mbfout.init("messages/alice_mbf",protocol_run_id,iteration);
     if(!this->is_new_run()){ //If this is not a new run, then load the previous message bunch;

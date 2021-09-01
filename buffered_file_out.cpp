@@ -1,6 +1,6 @@
 #include "buffered_file_out.h"
 #include <iostream>
-#
+
 
 using namespace std;
 
@@ -26,7 +26,7 @@ void BufferedFileOut::write_dual_parity(unsigned char dp){
 }
 
 BufferedFileOut::~BufferedFileOut(){
-    cout<<"destructing oufile writer: "<<outfilename<<endl;
+    cout<<"destructing oufile: "<<outfilename<<endl;
     if(out_file.is_open()){
         out_file.flush();
         out_file.close();

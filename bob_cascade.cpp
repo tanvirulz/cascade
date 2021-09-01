@@ -9,6 +9,7 @@
 
 #include "message_bunch_reader.h"
 #include "response_message_writer.h"
+#include "sifted_key_container.h"
 
 #define FILE_NAME_SIZE 256
 #define BUFFER_SIZE (32*1024)
@@ -23,12 +24,14 @@ using namespace std;
 class Bob{
     private:
     string key_file_name;
+    string working_key_file_name;
     string state_file_name; 
     int protocol_run_id;
     int iteration;
     int random_shuffle_seed;
 
-    string sk ; //sifted key
+    SiftedKeyContainer sk;
+    //string sk ; //sifted key
     MessageBunchReader mbfin;
     ResponseMessageWriter rbfout;
 
@@ -40,7 +43,7 @@ class Bob{
 
     
     int get_parity(int l, int h);
-
+    bool is_new_run();
     public:
     void init(string key_file_name, int protocol_run_id,int random_shuffle_seed);
     void cascade();
@@ -56,6 +59,8 @@ void Bob::store_state(){
     fprintf(state_file,"%d\n",this->iteration);
     fclose(state_file);
 }
+
+
 
 void Bob::load_state(){
     char state_file_name[FILE_NAME_SIZE];
@@ -82,12 +87,76 @@ void Bob::load_state(){
     }
 
 }
+
+bool Bob::is_new_run(){
+    if(this->iteration==0){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+/*
+void Bob::load_data(){
+    string working_sk_file_name = "working_"+this->key_file_name;
+    this->working_key_file_name = working_sk_file_name;
+    if (this->is_new_run()){
+        ifstream sk_file(this->key_file_name.c_str());
+        if (sk_file.is_open()){
+            cout<<"sifted key file opened"<<endl;
+            
+            sk_file.seekg(0, std::ios::end);   
+            this->sk.reserve(sk_file.tellg());
+            sk_file.seekg(0, std::ios::beg);
+            this->sk.assign((std::istreambuf_iterator<char>(sk_file)),
+                std::istreambuf_iterator<char>());
+            cout<<"read success!"<<endl;
+            cout<<"sk: "<<this->sk<<endl;
+            cout<<"bytes read: "<<sk.length()<<endl;
+            
+            sk_file.close();
+
+            ofstream working_sk_file(working_sk_file_name.c_str());
+            working_sk_file << this->sk;
+            working_sk_file.close();
+
+        }
+        else{
+            cout<<"could not open sifted key file: "<<key_file_name<<endl;
+        }
+    }
+    else{
+
+        ifstream sk_file(working_sk_file_name.c_str());
+        if (sk_file.is_open()){
+            cout<<"sifted key file opened"<<endl;
+           
+            sk_file.seekg(0, std::ios::end);   
+            this->sk.reserve(sk_file.tellg());
+            sk_file.seekg(0, std::ios::beg);
+            this->sk.assign((std::istreambuf_iterator<char>(sk_file)),
+                std::istreambuf_iterator<char>());
+            cout<<"read success!"<<endl;
+            cout<<"sk: "<<this->sk<<endl;
+            cout<<"bytes read: "<<sk.length()<<endl;
+            
+            sk_file.close();
+
+        }
+        else{
+            cout<<"could not open working sifted key file: "<<key_file_name<<endl;
+        }
+
+    }
+}
+*/
+/*
 void Bob::load_data(){
     ifstream sk_file(this->key_file_name.c_str());
     if (sk_file.is_open()){
         cout<<"sifted key file opened"<<endl;
         
-        /*pre assign buffer space for the sifted key string to be loaded*/
+        //pre assign buffer space for the sifted key string to be loaded
         sk_file.seekg(0, std::ios::end);   
         this->sk.reserve(sk_file.tellg());
         sk_file.seekg(0, std::ios::beg);
@@ -106,6 +175,7 @@ void Bob::load_data(){
     }
 
 }
+*/
 void Bob::init(string key_file_name, int protocol_run_id,int random_shuffle_seed){
     this->key_file_name=key_file_name;
     //this->state_file_name=state_file_name;
@@ -113,32 +183,25 @@ void Bob::init(string key_file_name, int protocol_run_id,int random_shuffle_seed
     this->random_shuffle_seed=random_shuffle_seed;
     this->iteration=0;
     
-    this->load_data();
     this->load_state();
+
+    this->sk.load_data(key_file_name,iteration);
     this->mbfin.init("messages/alice_mbf",protocol_run_id,iteration);
     this->rbfout.init("messages/bob_rbf",protocol_run_id,iteration);
 
 }
 
 
-int Bob::get_parity(int l, int h){
-    int p; //parity
-    p = 0;
-    for(int i=l;i<h;i++){
-        p += (sk[i]-'0');
-    }
-    p %=2;
-    return p;
-}
+
 void Bob::compute_and_write_response(int l, int h,uint8_t alcie_dp){
     int m = (l+h)/2;
     uint8_t response;
     uint8_t dual_parity = 0;
 
-    if (get_parity(l,m)){ //compute parity of the left sub-block
+    if (sk.get_parity(l,m)){ //compute parity of the left sub-block: low to middle
         dual_parity = dual_parity|LEFT;
     }
-    if (get_parity(m,h)){ // compute parity of the right sub-block
+    if (sk.get_parity(m,h)){ // compute parity of the right sub-block: middle to high
         dual_parity = dual_parity|RIGHT;
     }
 
@@ -175,7 +238,7 @@ int main(){
     Bob bob;
     bob.init("test_bob_sk.txt",35,3141562);
     bob.cascade();
-    bob.store_state();
+    bob.store_state(); //move to destructor
         
     return 0;
 }
