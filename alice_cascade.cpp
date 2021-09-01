@@ -9,6 +9,7 @@
 
 //#include "buffered_file_out.h"
 #include "message_bunch_writer.h"
+#include "response_message_reader.h"
 
 #define FILE_NAME_SIZE 256
 #define BUFFER_SIZE (32*1024)
@@ -193,6 +194,13 @@ int main(){
     
     //mbfout.write_index(12);
     //mbfout.write_dual_parity('a');
+    //ResponseMessageReader rmfin;
+    //rmfin.init("messages/bob_rbf",35,0);
+    //unsigned char dp;
+    //while(rmfin.read_response(&dp)){
+    //    cout<<"response freading in Alice: "<<int(dp)<<endl;
+    //}
+    
     Alice alice;
     //alice.load_data("test.txt");
     alice.init("test.txt",35,3141562);
@@ -200,7 +208,7 @@ int main(){
         alice.start_cascade();
     }
     //alice's state stored in destractor
-    
+
     //int l=1,h=14;
     //cout<<"parity "<<alice.get_parity(l,h)<<endl;
     return 0;
