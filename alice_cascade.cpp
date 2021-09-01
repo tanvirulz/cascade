@@ -99,55 +99,6 @@ void Alice::start_cascade(){
     this->iteration++; // this has to be stored in the state file
 }
 
-/*
-inline bool Alice::file_exists (const string& name) {
-    if (FILE *file = fopen(name.c_str(), "r")) {
-        fclose(file);
-        return true;
-    } else {
-        return false;
-    }   
-}
-
-void Alice::init_message_bunch_buffer_in(){
-    char mbf_in_name[FILE_NAME_SIZE];
-    sprintf(mbf_in_name,"mbf_%d_itr_%d.bin",protocol_run_id, iteration-1 ); //Load the message bunch file form the previous iteraiton.  
-    cout<<"mbf_in_name: "<<mbf_in_name<<endl;
-    this->message_bunch_in_file_name = mbf_in_name;
-    cout<< "asstring: "<<this->message_bunch_in_file_name<<" length "<<this->message_bunch_in_file_name.length()<<endl;
-    mbfin.rdbuf()->pubsetbuf(this->mbf_in_Buffer, BUFFER_SIZE);
-    mbfin.open(message_bunch_in_file_name, ios::in|ios::binary);
-    if(!mbfin.is_open()){
-        cout<<"ERROR: previous message bunch file not found!"<<endl;
-
-    }
-
-}
-void Alice::init_response_bunch_buffer_in(){
-    char rbf_in_name[FILE_NAME_SIZE];
-    sprintf(rbf_in_name,"mbf_%d_itr_%d.bin",protocol_run_id, iteration-1 );
-    cout<<"rbf_in_name: "<<rbf_in_name<<endl;
-    this->response_bunch_in_file_name = rbf_in_name;
-    cout<< "asstring: "<<this->response_bunch_in_file_name<<" length "<<this->response_bunch_in_file_name.length()<<endl;
-    rbfin.rdbuf()->pubsetbuf(this->rbf_in_Buffer, BUFFER_SIZE);
-    rbfin.open(response_bunch_in_file_name, ios::in|ios::binary);
-    if(!mbfin.is_open()){
-        cout<<"ERROR: response bunch file from Bob not found!"<< endl;
-    }
-
-}
-void Alice::init_message_bunch_buffer_out(){
-    char mbf_out_name[FILE_NAME_SIZE];
-    sprintf(mbf_out_name,"mbf_%d_itr_%d.bin",protocol_run_id,iteration);
-    cout<<mbf_out_name<<endl;
-    this->message_bunch_out_file_name = mbf_out_name;
-    cout<< "asstring: "<<this->message_bunch_out_file_name<<" length "<<this->message_bunch_out_file_name.length()<<endl;
-
-    mbfout.rdbuf()->pubsetbuf(this->mbf_out_Buffer, BUFFER_SIZE);
-    mbfout.open(message_bunch_out_file_name,ios::out|ios::binary|ios::trunc);
-
-}
-*/
 
 void Alice::load_data(){
     ifstream sk_file(this->key_file_name.c_str());

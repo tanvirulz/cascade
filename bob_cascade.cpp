@@ -28,19 +28,10 @@ class Bob{
     int iteration;
     int random_shuffle_seed;
 
-    //string message_bunch_file_name;
-    //string response_bunch_file_name;
-
     string sk ; //sifted key
     MessageBunchReader mbfin;
     ResponseMessageWriter rbfout;
-    /*
-    char mbfBuffer[BUFFER_SIZE];
-    char rbfBuffer[BUFFER_SIZE];
-    ifstream mbfin; //message bunch file in
-    ofstream rbfout; // response bunch file out
 
-    */
 
     void load_data();
     void init_message_bunch_buffer();
@@ -48,10 +39,6 @@ class Bob{
     void init_response_bunch_buffer();
 
     
-    //inline bool file_exists(const string& name);
-
-    //void compute_dual_block_parity(int l, int h);
-
     int get_parity(int l, int h);
 
     public:
@@ -82,6 +69,7 @@ void Bob::load_state(){
         cout<<"this is a new run"<<endl;
         //create new state file
         state_file = fopen(state_file_name,"w");
+        
         //write the iteration number for now;
         fprintf(state_file,"%d\n",this->iteration);
         fclose(state_file);
@@ -98,12 +86,14 @@ void Bob::load_data(){
     ifstream sk_file(this->key_file_name.c_str());
     if (sk_file.is_open()){
         cout<<"sifted key file opened"<<endl;
+        
         /*pre assign buffer space for the sifted key string to be loaded*/
         sk_file.seekg(0, std::ios::end);   
         this->sk.reserve(sk_file.tellg());
         sk_file.seekg(0, std::ios::beg);
         this->sk.assign((std::istreambuf_iterator<char>(sk_file)),
             std::istreambuf_iterator<char>());
+        
         cout<<"read success!"<<endl;
         cout<<"sk: "<<this->sk<<endl;
         cout<<"bytes read: "<<sk.length()<<endl;
@@ -145,13 +135,15 @@ void Bob::compute_and_write_response(int l, int h,uint8_t alcie_dp){
     uint8_t response;
     uint8_t dual_parity = 0;
 
-    if (get_parity(l,m)){
+    if (get_parity(l,m)){ //compute parity of the left sub-block
         dual_parity = dual_parity|LEFT;
     }
-    if (get_parity(m,h)){
+    if (get_parity(m,h)){ // compute parity of the right sub-block
         dual_parity = dual_parity|RIGHT;
     }
-    response = dual_parity^alcie_dp;
+
+    response = dual_parity^alcie_dp; //response bit is set to 1 if the corresponding block has missmatch in alice and bobs parity
+                                     // the exor operation ensures it
     cout<<"response: "<< int(response)<<endl;
     rbfout.write_response(response);
     //rbfout.write(reinterpret_cast<char *>(&response),sizeof(response));
@@ -179,20 +171,11 @@ void Bob::cascade(){
     
 }
 int main(){
-    /*
-    MessageBunchReader mbfin;
-    int l,h;
-    unsigned char dp;
-    mbfin.init("alice_mbf",35,0);
-    while(mbfin.read_message(&l,&h,&dp)){
-        cout<<"message from Alice read "<<l<<", "<<h<<", "<<int(dp)<<endl;
-    }*/
-    
+
     Bob bob;
     bob.init("test_bob_sk.txt",35,3141562);
     bob.cascade();
     bob.store_state();
-    
-    
+        
     return 0;
 }
