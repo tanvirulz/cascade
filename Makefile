@@ -2,14 +2,12 @@ CC=g++
 IFLAGS=-I ./include
 
 
-#list all the source c++ files
+#list all the source c++ files from the src directory
 SRCS := $(wildcard src/*.cpp)
 
 #create the object file names with directory prefix
 OBJS := $(SRCS:src/%.cpp=obj/%.o)
 
-#create all the headerfile names with directory prefix
-DEPS := $(SRCS:src/%.cpp=include/%.h)
 
 #implicite rules to create .o file from compiled .cpp files
 # $< selects the first entry form the conditions src/%.cpp include/%.h to be compiles. 
@@ -26,11 +24,11 @@ all : obj acc bcc
 .PHONY: all
 
 #create the executable for Alice
-acc: $(OBJS) alice_cascade.cpp $(DEPS)
+acc: $(OBJS) alice_cascade.cpp 
 	$(CC) -o acc alice_cascade.cpp $(OBJS) $(IFLAGS)
 
 #create the executable for Bob
-bcc: $(OBJS) bob_cascade.cpp $(DEPS)
+bcc: $(OBJS) bob_cascade.cpp
 	$(CC) -o bcc bob_cascade.cpp  $(OBJS) $(IFLAGS)
 
 #make object file directory obj if does not exists
