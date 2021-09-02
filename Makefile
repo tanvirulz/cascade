@@ -15,14 +15,14 @@ DEPS := $(SRCS:src/%.cpp=include/%.h)
 # $< selects the first entry form the conditions src/%.cpp include/%.h to be compiles. 
 #which is the source file. The %.h file in the condition ensures that the relevant object
 #file is recompiled when the .h file changes. 
-obj/%.o: src/%.cpp include/%.h
+obj/%.o: src/%.cpp include/%.h 
 	$(CC) -c -o $@ $< $(IFLAGS)
 
 
 #.PHONY tells tha all does not actually mean any output file. Rather it is a pseudo target. 
 # however it perfroms the condition checks on acc and bcc. And if any of those are outdated
 # the relevant chaine of file are recompiled  
-all : acc bcc 
+all : obj acc bcc 
 .PHONY: all
 
 #create the executable for Alice
@@ -33,8 +33,15 @@ acc: $(OBJS) alice_cascade.cpp $(DEPS)
 bcc: $(OBJS) bob_cascade.cpp $(DEPS)
 	$(CC) -o bcc bob_cascade.cpp  $(OBJS) $(IFLAGS)
 
+#make object file directory obj if does not exists
+
+obj: 
+	mkdir -p obj
+messages: 
+	mkdir -p messages
+
 .PHONY: run
-run: acc bcc
+run: messages acc bcc 
 	./acc
 	./bcc
 .PHONY: clean
