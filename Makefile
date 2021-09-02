@@ -1,10 +1,14 @@
 CC=g++
-IFLAGS=-I .
+IFLAGS=-I ./include
+SDIR=./src 
+ODIR=./obj
+BDIR=./bin
+IDIR=./include
 
 default:
 
-	$(CC) -o acc alice_cascade.cpp buffered_file_out.cpp message_bunch_writer.cpp buffered_file_in.cpp response_message_reader.cpp sifted_key_container.cpp $(IFLAGS)
-	$(CC) -o bcc bob_cascade.cpp message_bunch_reader.cpp buffered_file_in.cpp buffered_file_out.cpp response_message_writer.cpp sifted_key_container.cpp $(IFLAGS)
+	$(CC) -o acc alice_cascade.cpp buffered_file_out.cpp message_bunch_writer.cpp buffered_file_in.cpp response_message_reader.cpp message_bunch_reader.cpp sifted_key_container.cpp $(IFLAGS)
+#	$(CC) -o bcc bob_cascade.cpp message_bunch_reader.cpp buffered_file_in.cpp buffered_file_out.cpp response_message_writer.cpp sifted_key_container.cpp $(IFLAGS)
 
 
 run:

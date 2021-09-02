@@ -9,6 +9,7 @@
 
 //#include "buffered_file_out.h"
 #include "message_bunch_writer.h"
+#include "message_bunch_reader.h"
 #include "response_message_reader.h"
 #include "sifted_key_container.h"
 
@@ -37,7 +38,9 @@ class Alice{
     //string sk ; //sifted key
     
     MessageBunchWriter mbfout;
-    
+    MessageBunchReader mbfin;
+    ResponseMessageReader rbfin; 
+
     void compute_and_write_dual_block_parity(int l, int h);
     void load_state();
     void store_state();
@@ -49,10 +52,15 @@ class Alice{
     
     bool is_new_run();
     void start_cascade();
-    void cascade();
+    void cascade_step();
+    Alice(string key_file_name, int protocol_run_id,int random_shuffle_seed);
     ~Alice();
 
 };
+
+Alice::Alice(string key_file_name, int protocol_run_id,int random_shuffle_seed){
+    this->init(key_file_name,protocol_run_id,random_shuffle_seed);
+}
 
 Alice::~Alice(){
     this->store_state();
@@ -63,17 +71,17 @@ Alice::~Alice(){
 void Alice::compute_and_write_dual_block_parity(int l, int h){
     int m = (l+h)/2 ; //compute the midpoinf of the dual block
     uint8_t dual_parity = 0;
-    if (sk.get_parity(l,m)){
+    if (sk.get_parity(l,m)){ //compute parity of the left sub block
         dual_parity = dual_parity|LEFT;
     }
-    if (sk.get_parity(m,h)){
+    if (sk.get_parity(m,h)){ //compute parity of right sub block
         dual_parity = dual_parity|RIGHT;
     }
     cout<<"writing: "<<l<<", "<<h<<", "<<int(dual_parity)<<endl;
     mbfout.write_message(l,h,dual_parity);
 }
 
-void Alice::cascade(){
+void Alice::cascade_step(){
     return;
 }
 void Alice::start_cascade(){
@@ -137,8 +145,11 @@ void Alice::init(string key_file_name, int protocol_run_id,int random_shuffle_se
     this->sk.load_data(key_file_name,iteration);
     //this->init_message_bunch_buffer_out(); 
     this->mbfout.init("messages/alice_mbf",protocol_run_id,iteration);
-    if(!this->is_new_run()){ //If this is not a new run, then load the previous message bunch;
-    //    this->init_message_bunch_buffer_in();
+    if(!this->is_new_run()){ //If this is not a new run, 
+        //then load the previous message bunch to read;
+        this->mbfin.init("messages/alice_mbf",protocol_run_id,iteration-1);
+        //load the response bunch received from bob for my previous message bunch
+        this->rbfin.init("messages/bob_mbf",protocol_run_id,iteration-1);
     }   
     
 
@@ -171,9 +182,9 @@ int main(){
     //    cout<<"response freading in Alice: "<<int(dp)<<endl;
     //}
     
-    Alice alice;
+    Alice alice("test.txt",35,3141562);
     //alice.load_data("test.txt");
-    alice.init("test.txt",35,3141562);
+    //alice.init("test.txt",35,3141562);
     if(alice.is_new_run()){
         alice.start_cascade();
     }
@@ -181,6 +192,7 @@ int main(){
 
     //int l=1,h=14;
     //cout<<"parity "<<alice.get_parity(l,h)<<endl;
+    cout<< "Alice DOne"<<endl;
     return 0;
     
    

@@ -96,86 +96,7 @@ bool Bob::is_new_run(){
         return false;
     }
 }
-/*
-void Bob::load_data(){
-    string working_sk_file_name = "working_"+this->key_file_name;
-    this->working_key_file_name = working_sk_file_name;
-    if (this->is_new_run()){
-        ifstream sk_file(this->key_file_name.c_str());
-        if (sk_file.is_open()){
-            cout<<"sifted key file opened"<<endl;
-            
-            sk_file.seekg(0, std::ios::end);   
-            this->sk.reserve(sk_file.tellg());
-            sk_file.seekg(0, std::ios::beg);
-            this->sk.assign((std::istreambuf_iterator<char>(sk_file)),
-                std::istreambuf_iterator<char>());
-            cout<<"read success!"<<endl;
-            cout<<"sk: "<<this->sk<<endl;
-            cout<<"bytes read: "<<sk.length()<<endl;
-            
-            sk_file.close();
 
-            ofstream working_sk_file(working_sk_file_name.c_str());
-            working_sk_file << this->sk;
-            working_sk_file.close();
-
-        }
-        else{
-            cout<<"could not open sifted key file: "<<key_file_name<<endl;
-        }
-    }
-    else{
-
-        ifstream sk_file(working_sk_file_name.c_str());
-        if (sk_file.is_open()){
-            cout<<"sifted key file opened"<<endl;
-           
-            sk_file.seekg(0, std::ios::end);   
-            this->sk.reserve(sk_file.tellg());
-            sk_file.seekg(0, std::ios::beg);
-            this->sk.assign((std::istreambuf_iterator<char>(sk_file)),
-                std::istreambuf_iterator<char>());
-            cout<<"read success!"<<endl;
-            cout<<"sk: "<<this->sk<<endl;
-            cout<<"bytes read: "<<sk.length()<<endl;
-            
-            sk_file.close();
-
-        }
-        else{
-            cout<<"could not open working sifted key file: "<<key_file_name<<endl;
-        }
-
-    }
-}
-*/
-/*
-void Bob::load_data(){
-    ifstream sk_file(this->key_file_name.c_str());
-    if (sk_file.is_open()){
-        cout<<"sifted key file opened"<<endl;
-        
-        //pre assign buffer space for the sifted key string to be loaded
-        sk_file.seekg(0, std::ios::end);   
-        this->sk.reserve(sk_file.tellg());
-        sk_file.seekg(0, std::ios::beg);
-        this->sk.assign((std::istreambuf_iterator<char>(sk_file)),
-            std::istreambuf_iterator<char>());
-        
-        cout<<"read success!"<<endl;
-        cout<<"sk: "<<this->sk<<endl;
-        cout<<"bytes read: "<<sk.length()<<endl;
-        
-        sk_file.close();
-
-    }
-    else{
-        cout<<"could not open sifted key file: "<<key_file_name<<endl;
-    }
-
-}
-*/
 void Bob::init(string key_file_name, int protocol_run_id,int random_shuffle_seed){
     this->key_file_name=key_file_name;
     //this->state_file_name=state_file_name;
@@ -230,6 +151,7 @@ void Bob::cascade(){
         this->compute_and_write_response(l,h,dual_parity);
 
     }
+    
     this->iteration++;
     
 }

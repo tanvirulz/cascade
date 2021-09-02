@@ -26,7 +26,7 @@ void BufferedFileOut::write_dual_parity(unsigned char dp){
 }
 
 BufferedFileOut::~BufferedFileOut(){
-    cout<<"destructing oufile: "<<outfilename<<endl;
+    cout<<"Destructing oufile writer for: "<<outfilename<<endl;
     if(out_file.is_open()){
         out_file.flush();
         out_file.close();

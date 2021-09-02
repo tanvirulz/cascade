@@ -1,3 +1,6 @@
+#ifndef BUFFERED_FILE_IN_H
+#define BUFFERED_FILE_IN_H
+
 #include <fstream>
 #include <string>
 
@@ -22,3 +25,5 @@ class BufferedFileIn{
     ~BufferedFileIn();
 
 };
+
+#endif 
