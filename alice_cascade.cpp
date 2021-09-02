@@ -24,6 +24,7 @@
 using namespace std;
 
 
+
 class Alice{
 
     private:

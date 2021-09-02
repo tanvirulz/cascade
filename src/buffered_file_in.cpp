@@ -14,6 +14,7 @@ void BufferedFileIn::init(string name,int protocol_run_ind,int iteration){
 
     in_file.open(infilename, ios::in|ios::binary);
 
+
     if(!in_file.is_open()){
         cout<<"Error: File: "<<infilename<<" not found!"<<endl;
         exit(1);

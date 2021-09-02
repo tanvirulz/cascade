@@ -9,6 +9,7 @@
 #define INFILE_BUFFER_SIZE (32*1024)
 
 
+
 class BufferedFileIn{
     private:
     std::string infilename;

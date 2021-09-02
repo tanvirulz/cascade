@@ -36,6 +36,7 @@ class Bob{
     ResponseMessageWriter rbfout;
 
 
+
     void load_data();
     void init_message_bunch_buffer();
 
@@ -152,6 +153,7 @@ void Bob::cascade(){
 
     }
     
+
     this->iteration++;
     
 }
