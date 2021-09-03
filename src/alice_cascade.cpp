@@ -1,66 +1,12 @@
-#include <cstdio>
-#include <cinttypes>
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <streambuf>
-//#include <ifstream>
-
-//#include "buffered_file_out.h"
-#include "message_bunch_writer.h"
-#include "message_bunch_reader.h"
-#include "response_message_reader.h"
-#include "sifted_key_container.h"
-
-#define FILE_NAME_SIZE 256
-#define BUFFER_SIZE (32*1024)
-
-#define BLOCK_SIZE 4
-
-#define LEFT 2
-#define RIGHT 1
+#include "alice_cascade.h"
 
 using namespace std;
 
 
 
-class Alice{
-
-    private:
-    string key_file_name;
-    string working_key_file_name;
-    string state_file_name; 
-    int protocol_run_id;
-    int iteration;
-    int random_shuffle_seed;
-
-    SiftedKeyContainer sk;
-    //string sk ; //sifted key
-    
-    MessageBunchWriter mbfout;
-    MessageBunchReader mbfin;
-    ResponseMessageReader rbfin; 
-
-    void compute_and_write_dual_block_parity(int l, int h);
-    void load_state();
-    void store_state();
-
-    public:
-    
-    void init(string key_file_name, int protocol_run_id,int random_shuffle_seed);
-    
-    
-    bool is_new_run();
-    void start_cascade();
-    void cascade_step();
-    Alice(string key_file_name, int protocol_run_id,int random_shuffle_seed);
-    ~Alice();
-
-};
-
-Alice::Alice(string key_file_name, int protocol_run_id,int random_shuffle_seed){
-    this->init(key_file_name,protocol_run_id,random_shuffle_seed);
+Alice::Alice(string data_folder, string key_file_name, int protocol_run_id,int random_shuffle_seed){
+    this->init(data_folder, key_file_name,protocol_run_id,random_shuffle_seed);
 }
 
 Alice::~Alice(){
@@ -85,6 +31,7 @@ void Alice::compute_and_write_dual_block_parity(int l, int h){
 void Alice::cascade_step(){
     return;
 }
+
 void Alice::start_cascade(){
     int dual_block_size = BLOCK_SIZE*2;
     int num_message = sk.length()/dual_block_size ;
@@ -133,7 +80,8 @@ void Alice::store_state(){
     fclose(state_file);
 }
 
-void Alice::init(string key_file_name, int protocol_run_id,int random_shuffle_seed){
+void Alice::init(string data_folder, string key_file_name, int protocol_run_id,int random_shuffle_seed){
+    this->data_folder = data_folder;
     this->key_file_name=key_file_name;
     //this->state_file_name=state_file_name;
     this->protocol_run_id=protocol_run_id;
@@ -143,14 +91,16 @@ void Alice::init(string key_file_name, int protocol_run_id,int random_shuffle_se
     
     
     this->load_state();
-    this->sk.load_data(key_file_name,iteration);
+    this->sk.load_data(data_folder, key_file_name,iteration);
     //this->init_message_bunch_buffer_out(); 
     this->mbfout.init("messages/alice_mbf",protocol_run_id,iteration);
     if(!this->is_new_run()){ //If this is not a new run, 
+        //load the response bunch received from bob for my previous message bunch
+        this->rbfin.init("messages/bob_rbf",protocol_run_id,iteration-1);
+
         //then load the previous message bunch to read;
         this->mbfin.init("messages/alice_mbf",protocol_run_id,iteration-1);
-        //load the response bunch received from bob for my previous message bunch
-        this->rbfin.init("messages/bob_mbf",protocol_run_id,iteration-1);
+        
     }   
     
 
@@ -167,34 +117,3 @@ bool Alice::is_new_run(){
 
 
 
-int main(){
-    //BufferedFileOut mbfout("alice",35,10);
-    //MessageBunchWriter mbfout;
-    //mbfout.init("alice_mbf",35,10);
-    //mbfout.write_message(10,12,2);
-    //MessageBunchWriter * test;
-    
-    //mbfout.write_index(12);
-    //mbfout.write_dual_parity('a');
-    //ResponseMessageReader rmfin;
-    //rmfin.init("messages/bob_rbf",35,0);
-    //unsigned char dp;
-    //while(rmfin.read_response(&dp)){
-    //    cout<<"response freading in Alice: "<<int(dp)<<endl;
-    //}
-    
-    Alice alice("test.txt",35,3141562);
-    //alice.load_data("test.txt");
-    //alice.init("test.txt",35,3141562);
-    if(alice.is_new_run()){
-        alice.start_cascade();
-    }
-    //alice's state stored in destractor
-
-    //int l=1,h=14;
-    //cout<<"parity "<<alice.get_parity(l,h)<<endl;
-    cout<< "Alice DOne"<<endl;
-    return 0;
-    
-   
-}

@@ -51,8 +51,11 @@ bool BufferedFileIn::read_dual_parity(unsigned char * dp){
     
 }
 
+BufferedFileIn::BufferedFileIn(){
+    this->infilename = "NONE";
+}
 BufferedFileIn::~BufferedFileIn(){
-    cout<<"destructing oufile writer for: "<<infilename<<endl;
+    cout<<"destructing infile reader for: "<<infilename<<endl;
     if(in_file.is_open()){
         in_file.close();
     }

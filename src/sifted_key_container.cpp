@@ -18,10 +18,10 @@ int SiftedKeyContainer::length(){
     return key.length();
 }
 
-void SiftedKeyContainer::load_data(string name,int iteration){
-    string working_sk_file_name = "working_"+name;
+void SiftedKeyContainer::load_data(string data_folder, string name,int iteration){
+    string working_sk_file_name = data_folder+"/"+"working_"+name;
     if (iteration==0){ //this is the first load
-        ifstream sk_file(name.c_str());
+        ifstream sk_file((data_folder+"/"+name).c_str());
         if (sk_file.is_open()){
             cout<<"sifted key file opened"<<endl;
             /*pre assign buffer space for the sifted key string to be loaded*/
@@ -43,6 +43,7 @@ void SiftedKeyContainer::load_data(string name,int iteration){
         }
         else{
             cout<<"could not open sifted key file: "<<name<<endl;
+            exit(1);
         }
     }
     else{
@@ -65,6 +66,7 @@ void SiftedKeyContainer::load_data(string name,int iteration){
         }
         else{
             cout<<"could not open working sifted key file: "<<working_sk_file_name<<endl;
+            exit(1);
         }
 
     }

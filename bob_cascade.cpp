@@ -46,7 +46,7 @@ class Bob{
     int get_parity(int l, int h);
     bool is_new_run();
     public:
-    void init(string key_file_name, int protocol_run_id,int random_shuffle_seed);
+    void init(string data_folder,string key_file_name, int protocol_run_id,int random_shuffle_seed);
     void cascade();
     void load_state();
     void store_state();
@@ -98,7 +98,7 @@ bool Bob::is_new_run(){
     }
 }
 
-void Bob::init(string key_file_name, int protocol_run_id,int random_shuffle_seed){
+void Bob::init(string data_folder,string key_file_name, int protocol_run_id,int random_shuffle_seed){
     this->key_file_name=key_file_name;
     //this->state_file_name=state_file_name;
     this->protocol_run_id=protocol_run_id;
@@ -107,7 +107,7 @@ void Bob::init(string key_file_name, int protocol_run_id,int random_shuffle_seed
     
     this->load_state();
 
-    this->sk.load_data(key_file_name,iteration);
+    this->sk.load_data(data_folder,key_file_name,iteration);
     this->mbfin.init("messages/alice_mbf",protocol_run_id,iteration);
     this->rbfout.init("messages/bob_rbf",protocol_run_id,iteration);
 
@@ -160,7 +160,7 @@ void Bob::cascade(){
 int main(){
 
     Bob bob;
-    bob.init("test_bob_sk.txt",35,3141562);
+    bob.init(".","test_bob_sk.txt",35,3141562);
     bob.cascade();
     bob.store_state(); //move to destructor
         

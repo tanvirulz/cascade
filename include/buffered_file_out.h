@@ -1,3 +1,5 @@
+#ifndef BUFFERED_FILE_OUT_H
+#define BUFFERED_FILE_OUT_H
 #include <fstream>
 #include <string>
 
@@ -20,6 +22,10 @@ class BufferedFileOut{
     public:
     
     void init(std::string name,int protocol_run_ind,int iteration);
+    
+    BufferedFileOut();
     ~BufferedFileOut();
 
 };
+
+#endif

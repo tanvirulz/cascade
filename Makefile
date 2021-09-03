@@ -20,15 +20,15 @@ obj/%.o: src/%.cpp include/%.h
 #.PHONY tells tha all does not actually mean any output file. Rather it is a pseudo target. 
 # however it perfroms the condition checks on acc and bcc. And if any of those are outdated
 # the relevant chaine of file are recompiled  
-all : obj acc bcc 
+all : acc bcc 
 .PHONY: all
 
 #create the executable for Alice
-acc: $(OBJS) alice_cascade.cpp 
-	$(CC) -o acc alice_cascade.cpp $(OBJS) $(IFLAGS)
+acc: obj $(OBJS) alice_main.cpp 
+	$(CC) -o acc alice_main.cpp $(OBJS) $(IFLAGS)
 
 #create the executable for Bob
-bcc: $(OBJS) bob_cascade.cpp
+bcc: obj $(OBJS) bob_cascade.cpp
 	$(CC) -o bcc bob_cascade.cpp  $(OBJS) $(IFLAGS)
 
 #make object file directory obj if does not exists

@@ -4,9 +4,12 @@
 
 using namespace std;
 
+BufferedFileOut::BufferedFileOut(){
+    this->outfilename="NONE";
 
+}
 void BufferedFileOut::init(string name,int protocol_run_ind,int iteration){
-    outfilename=name+"_"+to_string(protocol_run_ind)+"_iter_"+to_string(iteration)+".bin";
+    this->outfilename=name+"_"+to_string(protocol_run_ind)+"_iter_"+to_string(iteration)+".bin";
     
     cout<< outfilename<<"; name length: "<<outfilename.length()<<endl;
     
