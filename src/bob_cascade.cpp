@@ -1,58 +1,8 @@
-#include <cstdio>
-#include <cinttypes>
-
+#include "bob_cascade.h"
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <streambuf>
-//#include <ifstream>
-
-#include "message_bunch_reader.h"
-#include "response_message_writer.h"
-#include "sifted_key_container.h"
-
-#define FILE_NAME_SIZE 256
-#define BUFFER_SIZE (32*1024)
-
-#define BLOCK_SIZE 4
-
-#define LEFT 2
-#define RIGHT 1
+#include <cstdio>
 
 using namespace std;
-
-class Bob{
-    private:
-    string key_file_name;
-    string working_key_file_name;
-    string state_file_name; 
-    int protocol_run_id;
-    int iteration;
-    int random_shuffle_seed;
-
-    SiftedKeyContainer sk;
-    //string sk ; //sifted key
-    MessageBunchReader mbfin;
-    ResponseMessageWriter rbfout;
-
-
-
-    void load_data();
-    void init_message_bunch_buffer();
-
-    void init_response_bunch_buffer();
-
-    
-    int get_parity(int l, int h);
-    bool is_new_run();
-    public:
-    void init(string data_folder,string key_file_name, int protocol_run_id,int random_shuffle_seed);
-    void cascade();
-    void load_state();
-    void store_state();
-    void compute_and_write_response(int l, int h,uint8_t dual_parity);
-
-};
 
 void Bob::store_state(){
     FILE * state_file;
@@ -115,10 +65,10 @@ void Bob::init(string data_folder,string key_file_name, int protocol_run_id,int 
 
 
 
-void Bob::compute_and_write_response(int l, int h,uint8_t alcie_dp){
+void Bob::compute_and_write_response(int l, int h,unsigned char alcie_dp){
     int m = (l+h)/2;
-    uint8_t response;
-    uint8_t dual_parity = 0;
+    unsigned char response;
+    unsigned char dual_parity = 0;
 
     if (sk.get_parity(l,m)){ //compute parity of the left sub-block: low to middle
         dual_parity = dual_parity|LEFT;
@@ -156,13 +106,4 @@ void Bob::cascade(){
 
     this->iteration++;
     
-}
-int main(){
-
-    Bob bob;
-    bob.init(".","test_bob_sk.txt",35,3141562);
-    bob.cascade();
-    bob.store_state(); //move to destructor
-        
-    return 0;
 }

@@ -28,8 +28,8 @@ acc: obj $(OBJS) alice_cascade_main.cpp
 	$(CC) -o acc alice_cascade_main.cpp $(OBJS) $(IFLAGS)
 
 #create the executable for Bob
-bcc: obj $(OBJS) bob_cascade.cpp
-	$(CC) -o bcc bob_cascade.cpp  $(OBJS) $(IFLAGS)
+bcc: obj $(OBJS) bob_cascade_main.cpp
+	$(CC) -o bcc bob_cascade_main.cpp  $(OBJS) $(IFLAGS)
 
 #make object file directory obj if does not exists
 
