@@ -24,8 +24,8 @@ all : acc bcc
 .PHONY: all
 
 #create the executable for Alice
-acc: obj $(OBJS) alice_main.cpp 
-	$(CC) -o acc alice_main.cpp $(OBJS) $(IFLAGS)
+acc: obj $(OBJS) alice_cascade_main.cpp 
+	$(CC) -o acc alice_cascade_main.cpp $(OBJS) $(IFLAGS)
 
 #create the executable for Bob
 bcc: obj $(OBJS) bob_cascade.cpp
