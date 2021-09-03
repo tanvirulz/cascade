@@ -51,3 +51,9 @@ clean:
 	rm -f messages/*.bin
 	rm -f working*.txt
 	rm -f *state*
+
+.PHONY: reset
+reset:
+	rm -f *state*
+	rm -f messages/*.bin
+	rm -f data/working*.txt

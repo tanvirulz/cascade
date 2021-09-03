@@ -5,7 +5,7 @@ using namespace std;
 int main(){
 
     Bob bob;
-    bob.init(".","test_bob_sk.txt",35,3141562);
+    bob.init("data","bob_sk.txt",35,3141562);
     bob.cascade();
     bob.store_state(); //move to destructor
     cout<<"bob done"<<endl;

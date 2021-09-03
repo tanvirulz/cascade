@@ -30,6 +30,45 @@ void Alice::compute_and_write_dual_block_parity(int l, int h){
 }
 
 void Alice::cascade_step(){
+
+    //recipe
+    //while(read next response)
+        //read old message
+        //if LEFT part has mismatch
+            //compute and write dual parity for LEFT part
+        //if RIGHT part has missmatch
+            //compute and write dual parity for RIGHT part
+        //if no missmatch, no new message is writen to to the message bunch
+        
+    // increase iteration number
+
+    //I should have named twin_parity instead of dual parity. [musings]
+    //because in mathematics dual has a different meaning which might
+    //confuse the reader of this code from math/crypto community
+ 
+    unsigned char response_dp; //response dual parity
+    unsigned char previous_dp; //dual parity previously calculated by alice for the dual block (l,h)
+    int l=0, h=0, m=0; // low, high, and middle index for a dual block
+    while(rbfin.read_response(&response_dp)){ //read response from Bob
+        if (mbfin.read_message(&l,&h,&previous_dp)){ // read the message corresponding the the received response
+            //check left
+            m = (l+h)/2;
+            if (response_dp&LEFT){ //parity missmatch at the left block; subdivite it.
+                this->compute_and_write_dual_block_parity(l,m);
+            }
+            if (response_dp&RIGHT){ //parity missmatch at the right block
+                this->compute_and_write_dual_block_parity(m,h);
+            }
+            //do nothing if no missmatch found
+        }
+        else{
+            cout<<"ERROR: "<<"response and message size missmatch at iteration: "<<iteration<<endl;
+            exit(1);
+        }
+    }
+    iteration++;
+
+
     return;
 }
 

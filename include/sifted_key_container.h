@@ -3,11 +3,14 @@
 #include<string>
 
 class SiftedKeyContainer{
-    public:
+    private:
     std::string key;
+    public:
+    
     
     void load_data(std:: string data_folder, std::string name,int iteration);
     int get_parity(int l, int h);
+    void print_subkey(int l, int h);
     int length();
 
 };

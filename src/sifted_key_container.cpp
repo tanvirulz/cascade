@@ -17,6 +17,15 @@ int SiftedKeyContainer::get_parity(int l, int h){
 int SiftedKeyContainer::length(){
     return key.length();
 }
+void SiftedKeyContainer::print_subkey(int l, int h){
+    if (h>=key.length()) h = key.length();
+    if (l<0) l=0;
+    int len = h-l;
+    cout<< this->key.substr(l,len);
+
+}
+
+
 
 void SiftedKeyContainer::load_data(string data_folder, string name,int iteration){
     string working_sk_file_name = data_folder+"/"+"working_"+name;

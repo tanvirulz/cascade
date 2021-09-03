@@ -20,7 +20,7 @@ int main(){
     //    cout<<"response freading in Alice: "<<int(dp)<<endl;
     //}
     
-    Alice alice(".","test.txt",35,3141562);
+    Alice alice("data","alice_sk.txt",35,3141562);
     //alice.load_data("test.txt");
     //alice.init("test.txt",35,3141562);
     if(alice.is_new_run()){
@@ -33,7 +33,7 @@ int main(){
 
     //int l=1,h=14;
     //cout<<"parity "<<alice.get_parity(l,h)<<endl;
-    cout<< "Alice DOne"<<endl;
+    cout<< "Alice Done"<<endl;
     return 0;
     
    

@@ -79,7 +79,7 @@ void Bob::compute_and_write_response(int l, int h,unsigned char alcie_dp){
 
     response = dual_parity^alcie_dp; //response bit is set to 1 if the corresponding block has missmatch in alice and bobs parity
                                      // the exor operation ensures it
-    cout<<"response: "<< int(response)<<endl;
+    cout<<"response: "<<l<<", "<<h<<", "<< int(response)<<endl;
     rbfout.write_response(response);
     //rbfout.write(reinterpret_cast<char *>(&response),sizeof(response));
 }

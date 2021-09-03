@@ -9,7 +9,6 @@
 #define FILE_NAME_SIZE 256
 #define BUFFER_SIZE (32*1024)
 
-#define BLOCK_SIZE 4
 
 #define LEFT 2
 #define RIGHT 1
